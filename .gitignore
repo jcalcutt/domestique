@@ -1,5 +1,5 @@
 __pycache__/
 .idea/
-data/output/*
+data/*
 *.ipynb
 .ipynb_checkpoints/
