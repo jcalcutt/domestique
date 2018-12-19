@@ -1,55 +1,55 @@
 import pandas as pd
-from scraper import DomestiqueScraper
-
-race_url = "https://www.britishcycling.org.uk/events/details/173396/Crits-at-the-Park--9"
+from domestique.scraper import DomestiqueScraper
 
 
-def main():
-    """Do the magic!
+class Domestique:
 
-    Get person_id url for each rider - their 'points page'
-    For each person_id url, extract data from their 'points table' and create some summary statistics from this,
-    such as; points per race or number of top 10 finishes. Export to CSV
-
-    :return summary_stats.csv:
-    """
     _domestique_scraper = DomestiqueScraper()
 
-    _domestique_scraper.get_data(race_url)
+    def main(self, race_url):
+        """Do the magic!
 
-    summary_lst = []
-    for key, value in _domestique_scraper.rider_data.items():
+        Get person_id url for each rider - their 'points page'
+        For each person_id url, extract data from their 'points table' and create some summary statistics from this,
+        such as; points per race or number of top 10 finishes. Export to CSV
 
-        summary_lst.append(create_summary_stats(key, _domestique_scraper.rider_data[key]['points_df']))
+        :return summary_stats.csv:
+        """
 
+        Domestique._domestique_scraper.get_data(race_url)
 
-    df_final = pd.DataFrame(summary_lst, columns=['Name', 'Races', 'Total Points', 'Points per Race', 'Top 10 Count',
-                                                  'Wins'])
+        summary_lst = []
+        for key, value in Domestique._domestique_scraper.rider_data.items():
 
-    df_final.to_csv('test.csv')  # TODO - prompt for name of output file, or dynamic
+            summary_lst.append(self.create_summary_stats(key, Domestique._domestique_scraper.rider_data[key]['points_df']))
 
-    print('All Done! Summary CSV created')
-    return
+        df_final = pd.DataFrame(summary_lst, columns=['Name', 'Races', 'Total Points', 'Points per Race',
+                                                      'Top 10 Count', 'Wins'])
 
-def create_summary_stats(person, points_df):
+        return df_final
 
-    num_races = len(points_df)
-    total_points = points_df.Points.sum()
-    try:
-        points_per_race = round(total_points / num_races, 2)
-        top_tens = points_df[(points_df.Position < 10) & (points_df.Position > 0)]['Position'].count()
-        wins = points_df[(points_df.Position == 1)]['Position'].count()
-    except:
-        points_per_race = 0
-        top_tens = 0
-        wins = 0
+    def create_summary_stats(self, person, points_df):
+        """From each rider points DataFrame create summary stats i.e. average points per race, number of wins etc.
 
-    # create list with all metrics
-    stat_lst = [person, num_races, total_points, points_per_race, top_tens, wins]
+        :param person: string, rider name
+        :param points_df: DataFrame, rider points table
+        :return stat_lst: list of summary stats
+        """
 
-    return stat_lst
+        num_races = len(points_df)
 
+        try:
+            total_points = points_df.Points.sum()
+            points_per_race = round(total_points / num_races, 2)
+            top_tens = points_df[(points_df.Position < 10) & (points_df.Position > 0)]['Position'].count()
+            wins = points_df[(points_df.Position == 1)]['Position'].count()
+        except AttributeError:
+            total_points = 0
+            points_per_race = 0
+            top_tens = 0
+            wins = 0
 
-if __name__ == '__main__':
+        # create list with all metrics
+        stat_lst = [person, num_races, total_points, points_per_race, top_tens, wins]
 
-    main()
+        return stat_lst

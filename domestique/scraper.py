@@ -2,25 +2,26 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
+import time
 
 
 class DomestiqueScraper:
 
-    def __init__(self, bc_race_url):
+    def __init__(self):
 
-        self.bc_race_url = bc_race_url
         self.startlist_base_url = "https://www.britishcycling.org.uk/events_version_2/ajax_race_entrants_dialog?race_id="
         self.points_url = "https://www.britishcycling.org.uk/points?person_id={}&year=2018&d=4"
-        self.rider_data ={}
+        self.rider_data = {}
 
+    def get_data(self, bc_race_url):
+        """from event page url, create dictionary with keys for each rider, with their points table (DataFrame) and club
+        as values
 
-    def get_data(self):
+        :param bc_race_url: string
+        :return rider_data: dictionary - keys as rider names, values: club, points table
+        """
 
-        # from event page url, create dictionary with keys for each rider
-        # rider_data[rider]['info'] = [name, cat, club]
-
-
-        rider_df = self.get_rider_urls()
+        rider_df = self.get_rider_urls(bc_race_url)
 
         # format df
         rider_df['id_lst'] = rider_df['name_href'].str.split('person_id=', expand=True)[1].str.split('&', expand=False)
@@ -31,20 +32,25 @@ class DomestiqueScraper:
 
             rider = row['name']
             self.rider_data[rider] = {}
-            if row['id']:
-                rider_id = str(row['id'])
+
+            if not pd.isnull(row['name_id']):
+                rider_id = str(row['name_id'])
                 self.rider_data[rider]['points_df'] = self.get_data_from_points_page(rider_id)
+                self.rider_data[rider]['club'] = row['club']
+            else:
+                self.rider_data[rider]['points_df'] = pd.DataFrame()
+                self.rider_data[rider]['club'] = 'No Club'
+            # be kind, I've been temporarily banned a few times...
+            time.sleep(5)
 
 
-
-
-    def get_rider_urls(self):
+    def get_rider_urls(self, bc_race_url):
         """
         from event url create dataframe of riders and their points page url
         :return:
         """
 
-        events_response = requests.get(self.bc_race_url)
+        events_response = requests.get(bc_race_url)
         event_soup = BeautifulSoup(events_response.content, 'html.parser')
 
         # obtain race id
@@ -77,7 +83,6 @@ class DomestiqueScraper:
 
         return pd.DataFrame(rider_club_href_lst, columns=['name', 'club', 'name_href', 'club_href'])
 
-
     def get_data_from_points_page(self, rider_id):
         """retrieve rider points page as a dataframe
 
@@ -88,13 +93,15 @@ class DomestiqueScraper:
         points_page = requests.get(self.points_url.format(rider_id))
 
         points_df = pd.read_html(points_page.content)[0]
+        points_df = points_df[:-1]
+        points_df.Position = points_df.Position.astype(float)
 
         return points_df
 
-
     @staticmethod
     def get_id(lst):
-        if type(lst) == type(list()):
+
+        if isinstance(lst, list):
             x = lst[0]
         else:
             x = np.NaN
