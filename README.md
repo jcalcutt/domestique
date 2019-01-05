@@ -1,5 +1,4 @@
 ###### _Domestique - "A rider who works for the benefit of their team and leader"_
-:bicyclist:
 
 A tool to create rider summary stats from a British Cycling event URL.
 

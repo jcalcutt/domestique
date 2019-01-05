@@ -1,0 +1,4 @@
+requests==2.18.4
+pandas==0.19.2
+numpy==1.13.3
+beautifulsoup4==4.7.0
