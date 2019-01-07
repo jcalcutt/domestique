@@ -4,12 +4,14 @@ from domestique.domestique import Domestique
 def run():
 
     _domestique = Domestique()
-    url = input("Enter a race URL: ")
-    print("Attempting to create stats ...hold tight this could take a few minutes...")
+    url = input("\nEnter a race URL (copy & paste): ")
+    year = input("\nYear to collect stats from: ")
 
-    stats_df = _domestique.main(str(url))
+    print(f"\n\nAttempting to create stats ...hold tight this could take a few minutes...")
 
-    csv_name = url.split('/')[-1]
+    stats_df = _domestique.main(str(url), str(year))
+
+    csv_name = f"{url.split('/')[-1]}_{str(year)}"
 
     stats_df.to_csv(f'data/{csv_name}.csv')
 

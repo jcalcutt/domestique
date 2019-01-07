@@ -10,10 +10,10 @@ class DomestiqueScraper:
     def __init__(self):
 
         self.startlist_base_url = "https://www.britishcycling.org.uk/events_version_2/ajax_race_entrants_dialog?race_id="
-        self.points_url = "https://www.britishcycling.org.uk/points?person_id={}&year=2018&d=4"
+        self.points_url = "https://www.britishcycling.org.uk/points?person_id={}&year={}&d=4"
         self.rider_data = {}
 
-    def get_data(self, bc_race_url):
+    def get_data(self, bc_race_url, year):
         """from event page url, create dictionary with keys for each rider, with their points table (DataFrame) and club
         as values
 
@@ -35,7 +35,7 @@ class DomestiqueScraper:
 
             if not pd.isnull(row['name_id']):
                 rider_id = str(row['name_id'])
-                self.rider_data[rider]['points_df'] = self.get_data_from_points_page(rider_id)
+                self.rider_data[rider]['points_df'] = self.get_data_from_points_page(rider_id, year)
                 self.rider_data[rider]['club'] = row['club']
             else:
                 self.rider_data[rider]['points_df'] = pd.DataFrame()
@@ -83,18 +83,22 @@ class DomestiqueScraper:
 
         return pd.DataFrame(rider_club_href_lst, columns=['name', 'club', 'name_href', 'club_href'])
 
-    def get_data_from_points_page(self, rider_id):
+    def get_data_from_points_page(self, rider_id, year):
         """retrieve rider points page as a dataframe
 
         :param rider_id: string
         :return: pandas df
         """
+        try:
+            points_page = requests.get(self.points_url.format(rider_id, year))
 
-        points_page = requests.get(self.points_url.format(rider_id))
+            points_df = pd.read_html(points_page.content)[0]
+            points_df = points_df[:-1]
+            points_df.Position = points_df.Position.astype(float)
 
-        points_df = pd.read_html(points_page.content)[0]
-        points_df = points_df[:-1]
-        points_df.Position = points_df.Position.astype(float)
+        except ValueError:
+            # if there's no data for a rider for the chosen year, return empty DataFrame
+            points_df = pd.DataFrame(columns=['Position', 'Points'])
 
         return points_df
 

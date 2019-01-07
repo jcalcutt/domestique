@@ -6,7 +6,7 @@ class Domestique:
 
     _domestique_scraper = DomestiqueScraper()
 
-    def main(self, race_url):
+    def main(self, race_url, year):
         """Do the magic!
 
         Get person_id url for each rider - their 'points page'
@@ -16,7 +16,7 @@ class Domestique:
         :return summary_stats.csv:
         """
 
-        Domestique._domestique_scraper.get_data(race_url)
+        Domestique._domestique_scraper.get_data(race_url, year)
 
         summary_lst = []
         for key, value in Domestique._domestique_scraper.rider_data.items():
@@ -43,7 +43,7 @@ class Domestique:
             points_per_race = round(total_points / num_races, 2)
             top_tens = points_df[(points_df.Position < 10) & (points_df.Position > 0)]['Position'].count()
             wins = points_df[(points_df.Position == 1)]['Position'].count()
-        except AttributeError:
+        except (AttributeError, ZeroDivisionError):
             total_points = 0
             points_per_race = 0
             top_tens = 0
