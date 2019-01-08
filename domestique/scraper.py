@@ -87,6 +87,7 @@ class DomestiqueScraper:
         """retrieve rider points page as a dataframe
 
         :param rider_id: string
+        :param year: string
         :return: pandas df
         """
         try:

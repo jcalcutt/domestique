@@ -5,7 +5,7 @@ def run():
 
     _domestique = Domestique()
     url = input("\nEnter a race URL (copy & paste): ")
-    year = input("\nYear to collect stats from: ")
+    year = input("\nYear to collect rider stats from: ")
 
     print(f"\n\nAttempting to create stats ...hold tight this could take a few minutes...")
 
