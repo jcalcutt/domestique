@@ -1,4 +1,5 @@
 from domestique.domestique import Domestique
+import os
 
 
 def run():
@@ -12,6 +13,9 @@ def run():
     stats_df = _domestique.main(str(url), str(year))
 
     csv_name = f"{url.split('/')[-1]}_{str(year)}"
+
+    if not os.path.exists('data'):
+        os.makedirs('data')
 
     stats_df.to_csv(f'data/{csv_name}.csv')
 
