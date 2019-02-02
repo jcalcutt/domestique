@@ -1,12 +1,16 @@
 import pandas as pd
+import googlemaps
+from datetime import datetime
 from domestique.scraper import DomestiqueScraper
+from domestique.secret import GOOGLE_API_KEY
 
 
 class Domestique:
 
     _domestique_scraper = DomestiqueScraper()
+    _gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
-    def main(self, race_url, year):
+    def main(self, race_url, year, from_location):
         """Do the magic!
 
         Get person_id url for each rider - their 'points page'
@@ -25,6 +29,8 @@ class Domestique:
 
         df_final = pd.DataFrame(summary_lst, columns=['Name', 'Races', 'Total Points', 'Points per Race',
                                                       'Top 10 Count', 'Wins'])
+
+        self.call_google_maps_api(from_location)
 
         return df_final
 
@@ -53,3 +59,18 @@ class Domestique:
         stat_lst = [person, num_races, total_points, points_per_race, top_tens, wins]
 
         return stat_lst
+
+    def call_google_maps_api(self, from_location):
+
+        venue = Domestique._domestique_scraper.location
+        if venue:
+
+            directions_result = Domestique._gmaps.distance_matrix(origins=from_location, destinations=venue,
+                                                                  mode="driving", departure_time=datetime.now())
+            # placeholder for now...
+            print(f"\n\nLocation data: {directions_result}")
+
+        else:
+            print("\nSorry, no distance calculation available")
+
+

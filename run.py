@@ -7,10 +7,11 @@ def run():
     _domestique = Domestique()
     url = input("\nEnter a race URL (copy & paste): ")
     year = input("\nYear to collect rider stats from: ")
+    from_location = input("\nWhereabouts will you be travelling from: ")
 
     print(f"\n\nAttempting to create stats ...hold tight this could take a few minutes...")
 
-    stats_df = _domestique.main(str(url), str(year))
+    stats_df = _domestique.main(str(url), str(year), str(from_location))
 
     csv_name = f"{url.split('/')[-1]}_{str(year)}"
 

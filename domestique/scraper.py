@@ -18,10 +18,13 @@ class DomestiqueScraper:
         as values
 
         :param bc_race_url: string
+        :param year: integer, year to collect data from
         :return rider_data: dictionary - keys as rider names, values: club, points table
         """
+        event_soup = DomestiqueScraper.create_page_soup(bc_race_url)
 
-        rider_df = self.get_rider_urls(bc_race_url)
+        self.get_venue_string(event_soup)
+        rider_df = self.get_rider_urls(event_soup)
 
         # format df
         rider_df['id_lst'] = rider_df['name_href'].str.split('person_id=', expand=True)[1].str.split('&', expand=False)
@@ -43,15 +46,19 @@ class DomestiqueScraper:
             # be kind, I've been temporarily banned a few times...
             time.sleep(5)
 
+    @staticmethod
+    def create_page_soup(bc_race_url):
 
-    def get_rider_urls(self, bc_race_url):
+        events_response = requests.get(bc_race_url)
+        event_soup = BeautifulSoup(events_response.content, 'html.parser')
+
+        return event_soup
+
+    def get_rider_urls(self, event_soup):
         """
         from event url create dataframe of riders and their points page url
         :return:
         """
-
-        events_response = requests.get(bc_race_url)
-        event_soup = BeautifulSoup(events_response.content, 'html.parser')
 
         # obtain race id
         race_id = event_soup.find('a', attrs={"class": "load_race_entrants button button--small button--secondary"})[
@@ -102,6 +109,20 @@ class DomestiqueScraper:
             points_df = pd.DataFrame(columns=['Position', 'Points'])
 
         return points_df
+
+    def get_venue_string(self, event_soup):
+        """Get the 'Venue' string from the summary page
+
+        :return:
+        """
+        try:
+            location = event_soup.find(attrs={"data-desktop-class":
+                                          "article__event-details__content"}).find('dt',
+                                                                                   text='Venue:').find_next_sibling('dd').text
+
+            self.location = location.replace('\n', '').replace('View map', '')
+        except AttributeError:
+            self.location = None
 
     @staticmethod
     def get_id(lst):

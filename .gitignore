@@ -4,3 +4,4 @@ data/*
 *.ipynb
 .ipynb_checkpoints/
 venv/
+secret.py
