@@ -16,22 +16,24 @@ class Domestique:
         :return summary_stats.csv:
         """
 
-        Domestique._domestique_scraper.get_data(race_url, year)
+        rider_data = Domestique._domestique_scraper.get_data(race_url, year)
 
         summary_lst = []
-        for key, value in Domestique._domestique_scraper.rider_data.items():
+        for rider, value in rider_data.items():
 
-            summary_lst.append(self.create_summary_stats(key, Domestique._domestique_scraper.rider_data[key]['points_df']))
+            summary_lst.append(self.create_summary_stats(rider, rider_data[rider]['club'],
+                                                         rider_data[rider]['points_df']))
 
-        df_final = pd.DataFrame(summary_lst, columns=['Name', 'Races', 'Total Points', 'Points per Race',
+        df_final = pd.DataFrame(summary_lst, columns=['Name', 'Club', 'Races', 'Total Points', 'Points per Race',
                                                       'Top 10 Count', 'Wins'])
 
         return df_final
 
-    def create_summary_stats(self, person, points_df):
+    def create_summary_stats(self, person, club, points_df):
         """From each rider points DataFrame create summary stats i.e. average points per race, number of wins etc.
 
         :param person: string, rider name
+        :param club: string, rider club
         :param points_df: DataFrame, rider points table
         :return stat_lst: list of summary stats
         """
@@ -50,6 +52,6 @@ class Domestique:
             wins = 0
 
         # create list with all metrics
-        stat_lst = [person, num_races, total_points, points_per_race, top_tens, wins]
+        stat_lst = [person, club, num_races, total_points, points_per_race, top_tens, wins]
 
         return stat_lst

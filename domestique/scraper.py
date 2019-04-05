@@ -3,14 +3,14 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 import time
+from domestique.util.scraper_constants import ScraperConstants
 
+sc = ScraperConstants()
 
 class DomestiqueScraper:
 
     def __init__(self):
 
-        self.startlist_base_url = "https://www.britishcycling.org.uk/events_version_2/ajax_race_entrants_dialog?race_id="
-        self.points_url = "https://www.britishcycling.org.uk/points?person_id={}&year={}&d=4"
         self.rider_data = {}
 
     def get_data(self, bc_race_url, year):
@@ -18,6 +18,7 @@ class DomestiqueScraper:
         as values
 
         :param bc_race_url: string
+        :param year: string
         :return rider_data: dictionary - keys as rider names, values: club, points table
         """
 
@@ -43,6 +44,7 @@ class DomestiqueScraper:
             # be kind, I've been temporarily banned a few times...
             time.sleep(5)
 
+        return self.rider_data
 
     def get_rider_urls(self, bc_race_url):
         """
@@ -54,11 +56,11 @@ class DomestiqueScraper:
         event_soup = BeautifulSoup(events_response.content, 'html.parser')
 
         # obtain race id
-        race_id = event_soup.find('a', attrs={"class": "load_race_entrants button button--small button--secondary"})[
-            'data-race-id']
+        race_id = event_soup.find(sc.EVENT_PAGE_RACE_ID_NAME, attrs={sc.EVENT_PAGE_RACE_ATTR_KEY:
+                                                        sc.EVENT_PAGE_RACE_ATTR_VALUE})[sc.EVENT_PAGE_RACE_ATTR_TAG]
 
         # get the startlist page and convert to a list
-        startlist_page = requests.get(self.startlist_base_url + race_id)
+        startlist_page = requests.get(sc.BC_STARLIST_PAGE_URL + race_id)
 
         startlist_soup = BeautifulSoup(startlist_page.content, 'html.parser')
 
@@ -91,7 +93,7 @@ class DomestiqueScraper:
         :return: pandas df
         """
         try:
-            points_page = requests.get(self.points_url.format(rider_id, year))
+            points_page = requests.get(sc.BC_POINTS_PAGE_URL.format(rider_id, year))
 
             points_df = pd.read_html(points_page.content)[0]
             points_df = points_df[:-1]
