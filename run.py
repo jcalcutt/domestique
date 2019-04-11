@@ -1,25 +1,20 @@
 from domestique.domestique import Domestique
-import os
+from domestique.util.utils import save_df
 
 
 def run():
 
     _domestique = Domestique()
-    url = input("\nEnter a race URL (copy & paste): ")
-    year = input("\nYear to collect rider stats from: ")
+    url = str(input("\nEnter a race URL (copy & paste): "))
+    year = str(input("\nYear to collect rider stats from: "))
 
     print(f"\n\nAttempting to create stats ...hold tight this could take a few minutes...")
 
-    stats_df = _domestique.main(str(url), str(year))
+    stats_df = _domestique.main(url, year)
 
-    csv_name = f"{url.split('/')[-1]}_{str(year)}"
+    save_df(stats_df, url, year)
 
-    if not os.path.exists('data'):
-        os.makedirs('data')
-
-    stats_df.to_csv(f'data/{csv_name}.csv')
-
-    print(f'\nAll done! \n \nCSV created: data/{csv_name}.csv\n***\n')
+    print(f'\nAll done! \n \nCSV created in the data directory\n***\n')
 
     return
 
