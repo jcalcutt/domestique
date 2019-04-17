@@ -6,6 +6,9 @@ class Domestique:
 
     _domestique_scraper = DomestiqueScraper()
 
+    def __init__(self):
+        pass
+
     def main(self, race_url, year):
         """Do the magic!
 
@@ -16,20 +19,20 @@ class Domestique:
         :return summary_stats.csv:
         """
 
-        rider_data = Domestique._domestique_scraper.get_data(race_url, year)
+        rider_field = Domestique._domestique_scraper.get_data(race_url, year)
 
         summary_lst = []
-        for rider, value in rider_data.items():
+        for rider in rider_field.field:
 
-            summary_lst.append(self.create_summary_stats(rider, rider_data[rider]['club'],
-                                                         rider_data[rider]['points_df']))
+            summary_lst.append(Domestique.create_summary_stats(rider.name, rider.club, rider.points_df))
 
         df_final = pd.DataFrame(summary_lst, columns=['Name', 'Club', 'Races', 'Total Points', 'Points per Race',
                                                       'Top 10 Count', 'Wins'])
 
         return df_final
 
-    def create_summary_stats(self, person, club, points_df):
+    @staticmethod
+    def create_summary_stats(person, club, points_df):
         """From each rider points DataFrame create summary stats i.e. average points per race, number of wins etc.
 
         :param person: string, rider name

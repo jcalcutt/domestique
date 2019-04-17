@@ -4,14 +4,15 @@ import pandas as pd
 import numpy as np
 import time
 from domestique.util.scraper_constants import ScraperConstants
+from domestique.util.data_classes import Rider, RaceField
 
 sc = ScraperConstants()
+
 
 class DomestiqueScraper:
 
     def __init__(self):
-
-        self.rider_data = {}
+        pass
 
     def get_data(self, bc_race_url, year):
         """from event page url, create dictionary with keys for each rider, with their points table (DataFrame) and club
@@ -22,31 +23,31 @@ class DomestiqueScraper:
         :return rider_data: dictionary - keys as rider names, values: club, points table
         """
 
-        rider_df = self.get_rider_urls(bc_race_url)
+        rider_df = DomestiqueScraper._get_rider_urls(bc_race_url)
 
         # format df
         rider_df['id_lst'] = rider_df['name_href'].str.split('person_id=', expand=True)[1].str.split('&', expand=False)
         rider_df['name_id'] = rider_df['id_lst'].apply(lambda x: DomestiqueScraper.get_id(x))
 
-        # create dictionary for each rider
+        field = []
+        # create rider and race field data class, get points data for each rider
         for index, row in rider_df.iterrows():
 
             rider = row['name']
-            self.rider_data[rider] = {}
 
             if not pd.isnull(row['name_id']):
                 rider_id = str(row['name_id'])
-                self.rider_data[rider]['points_df'] = self.get_data_from_points_page(rider_id, year)
-                self.rider_data[rider]['club'] = row['club']
+                field.append(Rider(rider, row['club'], DomestiqueScraper._get_data_from_points_page(rider_id, year)))
             else:
-                self.rider_data[rider]['points_df'] = pd.DataFrame()
-                self.rider_data[rider]['club'] = 'No Club'
+                field.append(Rider(rider, 'No Club', pd.DataFrame()))
+
             # be kind, I've been temporarily banned a few times...
             time.sleep(5)
 
-        return self.rider_data
+        return RaceField(field=field)
 
-    def get_rider_urls(self, bc_race_url):
+    @staticmethod
+    def _get_rider_urls(bc_race_url):
         """
         from event url create dataframe of riders and their points page url
         :return:
@@ -85,7 +86,8 @@ class DomestiqueScraper:
 
         return pd.DataFrame(rider_club_href_lst, columns=['name', 'club', 'name_href', 'club_href'])
 
-    def get_data_from_points_page(self, rider_id, year):
+    @staticmethod
+    def _get_data_from_points_page(rider_id, year):
         """retrieve rider points page as a dataframe
 
         :param rider_id: string

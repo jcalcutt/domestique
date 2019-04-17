@@ -1,3 +1,5 @@
+<i><b> Requires: Python 3.7+ </b></i>
+
 ###### _Domestique - "A rider who works for the benefit of their team and leader"_
 
 A tool to create summary stats for riders that are on the startlist for
