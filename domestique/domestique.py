@@ -14,9 +14,9 @@ class Domestique:
 
         Get person_id url for each rider - their 'points page'
         For each person_id url, extract data from their 'points table' and create some summary statistics from this,
-        such as; points per race or number of top 10 finishes. Export to CSV
+        such as; points per race or number of top 10 finishes.
 
-        :return summary_stats.csv:
+        :return df_final: pandas DataFrame of rider stats
         """
 
         rider_field = Domestique._domestique_scraper.get_data(race_url, year)
