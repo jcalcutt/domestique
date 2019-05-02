@@ -57,8 +57,7 @@ class DomestiqueScraper:
         event_soup = BeautifulSoup(events_response.content, 'html.parser')
 
         # obtain race id
-        race_id = event_soup.find(sc.EVENT_PAGE_RACE_ID_NAME, attrs={sc.EVENT_PAGE_RACE_ATTR_KEY:
-                                                        sc.EVENT_PAGE_RACE_ATTR_VALUE})[sc.EVENT_PAGE_RACE_ATTR_TAG]
+        race_id = event_soup.find(sc.EVENT_PAGE_RACE_ID_NAME, attrs=sc.EVENT_PAGE_RACE_ATTR)[sc.EVENT_PAGE_RACE_ATTR_TAG]
 
         # get the startlist page and convert to a list
         startlist_page = requests.get(sc.BC_STARLIST_PAGE_URL + race_id)
